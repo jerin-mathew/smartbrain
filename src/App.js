@@ -27,31 +27,52 @@ class App extends React.Component {
     5. set state to the input onInputChange
     6. create submit function similar and pass
     7. set state to image url
-    8. pass this state to the url on
+    8. pass this state to the url on 
+    9. register for clariface and on success response call the calculateFaceLocation function
+    10. the result form the facelocation and passed to the drawFaceBox for drawing box
   
   }*/
 
   constructor() {
     super();
     this.state = {
-      input: '',
+      input: 'https://cdn.vox-cdn.com/thumbor/CMJs1AJyAmf27RUd2UI5WBSZpy4=/0x0:3049x2048/920x613/filters:focal(1333x1562:1819x2048):format(webp)/cdn.vox-cdn.com/uploads/chorus_image/image/63058104/fake_ai_faces.0.png',
       imageUrl: '',
-      box: {},
+      box: [],
 
     }
   }
   calculateFaceLocation = (data) => {
-    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
     const image = document.getElementById('inputimage');
     const width = Number(image.width);
     const height = Number(image.height);
-    return {
-      topRow: clarifaiFace.top_row * height,
-      leftCol: clarifaiFace.left_col * width,
-      bottomRow: height - (clarifaiFace.bottom_row * height),
-      rightCol: width - (clarifaiFace.right_col * width)
-    }
 
+    //with for each function
+    // const box = [];
+    // data.outputs[0].data.regions.forEach(element => {
+    //   const clarifaiFace = element.region_info.bounding_box
+
+    //   box.push({
+    //     "topRow": clarifaiFace.top_row * height,
+    //     "leftCol": clarifaiFace.left_col * width,
+    //     "bottomRow": height - (clarifaiFace.bottom_row * height),
+    //     "rightCol": width - (clarifaiFace.right_col * width)
+    //   })
+
+    // });
+    // return box;
+
+    //with map function
+    const box = data.outputs[0].data.regions.map((item) => {
+      const clarifaiFace = item.region_info.bounding_box
+      return {
+        "topRow": clarifaiFace.top_row * height,
+        "leftCol": clarifaiFace.left_col * width,
+        "bottomRow": height - (clarifaiFace.bottom_row * height),
+        "rightCol": width - (clarifaiFace.right_col * width)
+      }
+    });
+    return box;
 
   }
 
@@ -64,14 +85,13 @@ class App extends React.Component {
 
   onDetectSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    console.log(this.state);
     app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-    .then((response)=>{
+      .then((response) => {
         return this.drawFaceBox(this.calculateFaceLocation(response));
       })
-    .catch((err)=>{
-      console.log("some error"+err);
-    })
+      .catch((err) => {
+        console.log("some error on predicting:" + err);
+      })
 
 
 
