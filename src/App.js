@@ -68,17 +68,15 @@ class App extends React.Component {
     this.setState({ imageUrl: this.state.input });
     console.log(this.state);
     app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input).then(
-      function (response) {
-        // do something with response
-        console.log("actual response"+response);
-        // this.drawFaceBox(this.calculateFaceLocation(response));
-        
-      },
-      function (err) {
-        // there was an error
-        console.log(err);
-      }
-    );
+    function(response) {
+      // do something with response
+      console.log(response);
+    },
+    function(err) {
+      // there was an error
+      console.log("some error occured");
+    }
+  );
 
 
   }
