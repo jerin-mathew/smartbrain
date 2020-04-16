@@ -5,9 +5,9 @@ import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import ImageLink from './components/ImageLink/ImageLink';
 import Rank from './components/Rank/Rank';
 import Clarifai from 'clarifai';
-
+import SignIn from './components/SignIn/SignIn';
+import Register from './components/Register/Register';
 import './App.css';
-
 const app = new Clarifai.App({
   apiKey: '214a7a615d2c477182db914d4c27cfb5'
 });
@@ -39,6 +39,8 @@ class App extends React.Component {
       input: 'https://cdn.vox-cdn.com/thumbor/CMJs1AJyAmf27RUd2UI5WBSZpy4=/0x0:3049x2048/920x613/filters:focal(1333x1562:1819x2048):format(webp)/cdn.vox-cdn.com/uploads/chorus_image/image/63058104/fake_ai_faces.0.png',
       imageUrl: '',
       box: [],
+      Route: 'SignIn',
+      isSignedIn: false
 
     }
   }
@@ -92,20 +94,32 @@ class App extends React.Component {
       .catch((err) => {
         console.log("some error on predicting:" + err);
       })
+  }
 
-
-
+  onRouteChange = (route) => {
+    route === "Home" ? this.setState({ isSignedIn: false }) : this.setState({ isSignedIn: true })
+    this.setState({ Route: route });
   }
   render() {
-
+    console.log(this.state.Route);
     return (
       <div>
-        <Navigation></Navigation>
-        <Logo></Logo>
-        <Rank></Rank>
-        <ImageLink onInputChange={this.onInputChange} onDetectSubmit={this.onDetectSubmit}></ImageLink>
-        <FaceRecognition imageUrl={this.state.imageUrl} box={this.state.box}></FaceRecognition>
+        <Navigation onRouteChange={this.onRouteChange} isSignedIn={this.state.isSignedIn} ></Navigation>
+        {
 
+          this.state.Route === "SignIn"
+            ? <SignIn onRouteChange={this.onRouteChange}></SignIn>
+            : (
+              this.state.Route === "Register"
+                ? <Register onRouteChange={this.onRouteChange}></Register>
+                : <div>
+                  <Logo></Logo>
+                  <Rank></Rank>
+                  <ImageLink onInputChange={this.onInputChange} onDetectSubmit={this.onDetectSubmit}></ImageLink>
+                  <FaceRecognition imageUrl={this.state.imageUrl} box={this.state.box}></FaceRecognition>
+                </div>
+            )
+        }
       </div>
     );
   }
