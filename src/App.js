@@ -24,7 +24,21 @@ const particlesOptions = {
       }
     }
   }
-  
+
+}
+const initialState = {
+  input: '',
+  imageUrl: '',
+  box: [],
+  Route: 'SignIn',
+  isSignedIn: false,
+  user: {
+    id: '',
+    name: '',
+    email: '',
+    entries: 0,
+    joined: ''
+  }
 }
 class App extends React.Component {
 
@@ -54,9 +68,28 @@ class App extends React.Component {
       imageUrl: '',
       box: [],
       Route: 'SignIn',
-      isSignedIn: false
+      isSignedIn: false,
+      user: {
+        id: '',
+        name: '',
+        email: '',
+        entries: 0,
+        joined: ''
+      }
 
     }
+  }
+
+  loadUser = (data) => {
+    this.setState({
+      user: {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        entries: data.entries,
+        joined: data.joined
+      }
+    })
   }
   calculateFaceLocation = (data) => {
     const image = document.getElementById('inputimage');
@@ -103,6 +136,27 @@ class App extends React.Component {
     this.setState({ imageUrl: this.state.input });
     app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
       .then((response) => {
+        if (response) {
+          // on successfull resposned update the count
+          fetch('http://localhost:4000/image', {
+            method: 'put',
+            headers: { 'content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: this.state.user.id,
+
+            })
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.email) {
+                this.setState(Object.assign(this.state.user, { entries: data.entries }))
+              }
+              else {
+                console.log('count update failed')
+              }
+            })
+        }
+
         return this.drawFaceBox(this.calculateFaceLocation(response));
       })
       .catch((err) => {
@@ -118,25 +172,25 @@ class App extends React.Component {
     console.log(this.state);
     return (
       <div>
-        <Particles className='particles' params={particlesOptions}/>
+        <Particles className='particles' params={particlesOptions} />
 
         <Navigation onRouteChange={this.onRouteChange} isSignedIn={this.state.isSignedIn} ></Navigation>
         {
 
           this.state.Route === "SignIn"
-            ? <SignIn onRouteChange={this.onRouteChange}></SignIn>
+            ? <SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser}></SignIn>
             : (
               this.state.Route === "Register"
                 ? <Register onRouteChange={this.onRouteChange}></Register>
                 : <div>
                   <Logo></Logo>
-                  <Rank></Rank>
+                  <Rank rank={this.state.user.entries}></Rank>
                   <ImageLink onInputChange={this.onInputChange} onDetectSubmit={this.onDetectSubmit}></ImageLink>
                   <FaceRecognition imageUrl={this.state.imageUrl} box={this.state.box}></FaceRecognition>
                 </div>
             )
         }
-        
+
       </div>
     );
   }
