@@ -7,11 +7,25 @@ import Rank from './components/Rank/Rank';
 import Clarifai from 'clarifai';
 import SignIn from './components/SignIn/SignIn';
 import Register from './components/Register/Register';
+import Particles from 'react-particles-js'
+
 import './App.css';
 const app = new Clarifai.App({
   apiKey: '214a7a615d2c477182db914d4c27cfb5'
 });
 
+const particlesOptions = {
+  particles: {
+    number: {
+      value: 80,
+      density: {
+        enable: true,
+        value_area: 800
+      }
+    }
+  }
+  
+}
 class App extends React.Component {
 
   /*{
@@ -97,13 +111,15 @@ class App extends React.Component {
   }
 
   onRouteChange = (route) => {
-    route === "Home" ? this.setState({ isSignedIn: false }) : this.setState({ isSignedIn: true })
+    route === "Home" ? this.setState({ isSignedIn: true }) : this.setState({ isSignedIn: false })
     this.setState({ Route: route });
   }
   render() {
-    console.log(this.state.Route);
+    console.log(this.state);
     return (
       <div>
+        <Particles className='particles' params={particlesOptions}/>
+
         <Navigation onRouteChange={this.onRouteChange} isSignedIn={this.state.isSignedIn} ></Navigation>
         {
 
@@ -120,6 +136,7 @@ class App extends React.Component {
                 </div>
             )
         }
+        
       </div>
     );
   }
